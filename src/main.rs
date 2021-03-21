@@ -25,16 +25,27 @@ fn main() -> Result<(), io::Error> {
     loop {
         terminal.draw(|f| ui::draw(f, &mut app))?;
 
-        match rx.recv().unwrap() {
+        match rx.recv().unwrap_or(event::Event::Tick) {
             event::Event::Input(key_event) => match key_event.code {
                 KeyCode::Char(c) => {
                     if c == 'q' && key_event.modifiers == KeyModifiers::CONTROL {
                         println!("receive ctrl+q");
                         break;
                     }
+
+                    app.on_char(c);
                 }
                 KeyCode::Tab => {
                     app.next_block();
+                }
+                KeyCode::Backspace => {
+                    app.on_backspace();
+                }
+                KeyCode::Left => {
+                    app.on_left();
+                }
+                KeyCode::Right => {
+                    app.on_right();
                 }
                 _ => {}
             },
