@@ -1,4 +1,8 @@
-use std::cmp::{max, min};
+pub mod command;
+pub mod viewer;
+
+use command::{CommandResult, CommandState};
+use viewer::ViewerState;
 
 #[derive(PartialEq, Clone)]
 pub enum ActiveBlock {
@@ -6,48 +10,11 @@ pub enum ActiveBlock {
     Viewer,
 }
 
-pub struct CommandState {
-    pub input: String,
-    pub input_index: i32,
-}
-
-impl CommandState {
-    pub fn new() -> Self {
-        CommandState {
-            input: String::new(),
-            input_index: 0,
-        }
-    }
-
-    pub fn on_char(&mut self, key: char) {
-        self.input.push(key);
-        self.input_index += 1;
-    }
-
-    pub fn on_backspace(&mut self) {
-        let remove_index = max(self.input_index - 1, 0) as usize;
-
-        if self.input.is_empty() || self.input_index == 0 {
-            return;
-        }
-
-        self.input.remove(remove_index);
-        self.on_left();
-    }
-
-    pub fn on_left(&mut self) {
-        self.input_index = max(self.input_index - 1, 0);
-    }
-
-    pub fn on_right(&mut self) {
-        self.input_index = min(self.input_index + 1, self.input.len() as i32);
-    }
-}
-
 pub struct App {
     pub active_block: usize,
     pub all_blocks: Vec<ActiveBlock>,
     pub command_state: CommandState,
+    pub viewer_state: ViewerState,
 }
 
 impl App {
@@ -56,6 +23,7 @@ impl App {
             active_block: 0,
             all_blocks: vec![ActiveBlock::Command, ActiveBlock::Viewer],
             command_state: CommandState::new(),
+            viewer_state: ViewerState::new(),
         }
     }
 
@@ -89,5 +57,13 @@ impl App {
         if self.active() == ActiveBlock::Command {
             self.command_state.on_left();
         }
+    }
+
+    pub fn on_enter(&mut self) -> CommandResult {
+        if self.active() == ActiveBlock::Command {
+            return self.command_state.on_enter();
+        }
+
+        CommandResult::None
     }
 }

@@ -2,7 +2,8 @@ mod app;
 mod event;
 mod ui;
 
-use crossterm::event::{KeyCode, KeyModifiers};
+use app::command::CommandResult;
+use crossterm::event::KeyCode;
 use std::time::Duration;
 use std::{io, sync::mpsc};
 use tui::backend::CrosstermBackend;
@@ -28,11 +29,6 @@ fn main() -> Result<(), io::Error> {
         match rx.recv().unwrap_or(event::Event::Tick) {
             event::Event::Input(key_event) => match key_event.code {
                 KeyCode::Char(c) => {
-                    if c == 'q' && key_event.modifiers == KeyModifiers::CONTROL {
-                        println!("receive ctrl+q");
-                        break;
-                    }
-
                     app.on_char(c);
                 }
                 KeyCode::Tab => {
@@ -47,6 +43,12 @@ fn main() -> Result<(), io::Error> {
                 KeyCode::Right => {
                     app.on_right();
                 }
+                KeyCode::Enter => match app.on_enter() {
+                    CommandResult::Quit => {
+                        break;
+                    }
+                    _ => {}
+                },
                 _ => {}
             },
             event::Event::Tick => {
