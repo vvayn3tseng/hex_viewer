@@ -66,4 +66,6 @@ impl App {
 
         CommandResult::None
     }
+
+    pub fn open_file(&mut self, path: String) {}
 }

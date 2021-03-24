@@ -8,6 +8,10 @@ use tui::{
     Frame,
 };
 
+const HEADER: &[&str] = &[
+    "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0A", "0B", "0C", "0D", "0E", "0F",
+];
+
 pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -37,32 +41,54 @@ fn draw_viewer<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
 where
     B: Backend,
 {
+    let rect = f.size();
     let border_style = get_border_style(app.active(), ActiveBlock::Viewer);
-    let data: Vec<u8> = vec![
-        0x15, 0xfd, 0xa0, 0x00, 0x12, 0x10, 0x80, 0x95, 0xfe, 0x15, 0xfd, 0xa0, 0x00, 0x12, 0x10,
-        0x80, 0x95, 0xfe,
-    ];
+    let current_offset = 0;
+    // let data: Vec<u8> = vec![
+    //     0x15, 0xfd, 0xa0, 0x00, 0x12, 0x10, 0x80, 0x95, 0xfe, 0x15, 0xfd, 0xa0, 0x00, 0x12, 0x10,
+    //     0x80, 0x95, 0xfe,
+    // ];
+    // let mut text = vec![];
+    // let mut line = vec![];
+
+    // let mut count = 0;
+    // for byte in data {
+    //     let display = format!("{:X}", byte);
+
+    //     line.push(Span::raw(display));
+
+    //     count += 1;
+
+    //     if count == 16 {
+    //         count = 0;
+    //         text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
+    //     } else {
+    //         line.push(Span::raw(" "));
+    //     }
+    // }
+
+    // if count != 16 {
+    //     text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
+    // }
+
+    let offset_display = format!("{:016X}", current_offset);
+
     let mut text = vec![];
     let mut line = vec![];
-
-    let mut count = 0;
-    for byte in data {
-        let display = format!("{:X}", byte);
-
-        line.push(Span::raw(display));
-
-        count += 1;
-
-        if count == 16 {
-            count = 0;
-            text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
-        } else {
-            line.push(Span::raw(" "));
-        }
+    line.push(Span::raw(
+        (0..offset_display.len() + 2)
+            .map(|_| " ")
+            .collect::<String>(),
+    ));
+    for offset in HEADER {
+        line.push(Span::raw(offset.clone()));
+        line.push(Span::raw(" "));
     }
+    text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
 
-    if count != 16 {
-        text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
+    for i in (0..rect.width) {
+        let display = format!("{:016X}", current_offset + 16 * i);
+        text.push(Spans::from(Span::raw(display)));
     }
 
     let para = Paragraph::new(text).block(

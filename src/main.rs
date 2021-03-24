@@ -47,6 +47,9 @@ fn main() -> Result<(), io::Error> {
                     CommandResult::Quit => {
                         break;
                     }
+                    CommandResult::Open(path) => {
+                        app.open_file(path);
+                    }
                     _ => {}
                 },
                 _ => {}
