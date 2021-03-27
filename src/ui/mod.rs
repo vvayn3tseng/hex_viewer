@@ -43,7 +43,9 @@ where
 {
     let rect = f.size();
     let border_style = get_border_style(app.active(), ActiveBlock::Viewer);
-    let current_offset = 0;
+    let current_offset = app.viewer_state.offset;
+
+    app.viewer_state.height = area.height;
     // let data: Vec<u8> = vec![
     //     0x15, 0xfd, 0xa0, 0x00, 0x12, 0x10, 0x80, 0x95, 0xfe, 0x15, 0xfd, 0xa0, 0x00, 0x12, 0x10,
     //     0x80, 0x95, 0xfe,
@@ -71,7 +73,7 @@ where
     //     text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
     // }
 
-    let offset_display = format!("{:016X}", current_offset);
+    let offset_display = format!("{:011X}", current_offset);
 
     let mut text = vec![];
     let mut line = vec![];
@@ -86,8 +88,8 @@ where
     }
     text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
 
-    for i in (0..rect.width) {
-        let display = format!("{:016X}", current_offset + 16 * i);
+    for i in 0..area.height {
+        let display = format!("{:011X}", current_offset + 16 * i as usize);
         text.push(Spans::from(Span::raw(display)));
     }
 
@@ -97,6 +99,10 @@ where
             .borders(Borders::ALL)
             .border_style(border_style),
     );
+
+    if app.active() == ActiveBlock::Viewer {
+        f.set_cursor(app.viewer_state.cursor.0, app.viewer_state.cursor.1);
+    }
 
     f.render_widget(para, area);
 }
@@ -114,9 +120,11 @@ where
             .border_style(border_style),
     );
 
-    f.set_cursor(
-        area.x + app.command_state.input_index as u16 + 1,
-        area.y + 1,
-    );
+    if app.active() == ActiveBlock::Command {
+        f.set_cursor(
+            area.x + app.command_state.input_index as u16 + 1,
+            area.y + 1,
+        );
+    }
     f.render_widget(command, area);
 }

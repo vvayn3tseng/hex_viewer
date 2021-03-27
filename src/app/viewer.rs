@@ -1,6 +1,11 @@
 use std::fs::File;
 use std::io::prelude::*;
 
+const VIEWER_X_START: u16 = 15;
+const VIEWER_Y_START: u16 = 3;
+const BYTE_NUMBER: usize = 16;
+const LINE_COUNT: u16 = VIEWER_X_START + 16 * 2 + 15;
+
 pub struct BufferCache {
     pub offset: u64,
     pub length: u64,
@@ -20,6 +25,9 @@ impl BufferCache {
 pub struct ViewerState {
     pub file_handle: Option<File>,
     pub caches: Vec<BufferCache>,
+    pub cursor: (u16, u16),
+    pub offset: usize,
+    pub height: u16,
 }
 
 impl ViewerState {
@@ -27,6 +35,9 @@ impl ViewerState {
         ViewerState {
             file_handle: None,
             caches: vec![],
+            cursor: (VIEWER_X_START, VIEWER_Y_START),
+            offset: 0,
+            height: 0,
         }
     }
 
@@ -63,5 +74,47 @@ impl ViewerState {
         self.caches.push(cache);
 
         &self.caches[self.caches.len() - 1].buffer[0..length as usize]
+    }
+
+    pub fn on_left(&mut self) {
+        if self.cursor.0 - 1 >= VIEWER_X_START {
+            self.cursor.0 -= 1;
+        }
+    }
+
+    pub fn on_right(&mut self) {
+        if self.cursor.0 + 1 <= LINE_COUNT {
+            self.cursor.0 += 1;
+        }
+    }
+
+    pub fn on_up(&mut self) {
+        if self.cursor.1 - 1 >= VIEWER_Y_START {
+            self.cursor.1 -= 1;
+        } else if self.offset >= BYTE_NUMBER {
+            self.offset -= BYTE_NUMBER;
+        }
+    }
+
+    pub fn on_down(&mut self) {
+        if self.cursor.1 + 1 < self.height {
+            self.cursor.1 += 1;
+        } else {
+            self.offset += 16;
+        }
+    }
+
+    pub fn on_page_down(&mut self) {
+        self.offset += ((self.height - VIEWER_Y_START) * BYTE_NUMBER as u16) as usize;
+    }
+
+    pub fn on_page_up(&mut self) {
+        let offset = ((self.height - 3) * BYTE_NUMBER as u16) as usize;
+
+        if self.offset < offset {
+            self.offset = 0;
+        } else {
+            self.offset -= offset;
+        }
     }
 }

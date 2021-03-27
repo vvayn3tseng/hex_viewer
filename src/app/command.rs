@@ -6,6 +6,16 @@ pub enum CommandResult {
     Open(String),
 }
 
+fn parse_command(input: String) -> CommandResult {
+    // let inputs: Vec<&str> = input.split(" ").collect();
+
+    if input == "quit" {
+        return CommandResult::Quit;
+    }
+
+    CommandResult::None
+}
+
 pub struct CommandState {
     pub input: String,
     pub input_index: i32,
@@ -44,9 +54,6 @@ impl CommandState {
     }
 
     pub fn on_enter(&mut self) -> CommandResult {
-        if self.input == "quit" {
-            return CommandResult::Quit;
-        }
-        CommandResult::None
+        parse_command(self.input.drain(..).collect())
     }
 }

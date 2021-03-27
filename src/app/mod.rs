@@ -48,14 +48,30 @@ impl App {
     }
 
     pub fn on_right(&mut self) {
-        if self.active() == ActiveBlock::Command {
-            self.command_state.on_right();
+        match self.active() {
+            ActiveBlock::Command => self.command_state.on_right(),
+            ActiveBlock::Viewer => self.viewer_state.on_right(),
         }
     }
 
     pub fn on_left(&mut self) {
-        if self.active() == ActiveBlock::Command {
-            self.command_state.on_left();
+        match self.active() {
+            ActiveBlock::Command => self.command_state.on_left(),
+            ActiveBlock::Viewer => self.viewer_state.on_left(),
+        }
+    }
+
+    pub fn on_up(&mut self) {
+        match self.active() {
+            ActiveBlock::Viewer => self.viewer_state.on_up(),
+            _ => {}
+        }
+    }
+
+    pub fn on_down(&mut self) {
+        match self.active() {
+            ActiveBlock::Viewer => self.viewer_state.on_down(),
+            _ => {}
         }
     }
 
@@ -67,5 +83,19 @@ impl App {
         CommandResult::None
     }
 
-    pub fn open_file(&mut self, path: String) {}
+    pub fn on_page_down(&mut self) {
+        if self.active() == ActiveBlock::Viewer {
+            self.viewer_state.on_page_down();
+        }
+    }
+
+    pub fn on_page_up(&mut self) {
+        if self.active() == ActiveBlock::Viewer {
+            self.viewer_state.on_page_up();
+        }
+    }
+
+    pub fn open_file(&mut self, path: String) {
+        self.viewer_state.open(path);
+    }
 }

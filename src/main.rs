@@ -28,21 +28,15 @@ fn main() -> Result<(), io::Error> {
 
         match rx.recv().unwrap_or(event::Event::Tick) {
             event::Event::Input(key_event) => match key_event.code {
-                KeyCode::Char(c) => {
-                    app.on_char(c);
-                }
-                KeyCode::Tab => {
-                    app.next_block();
-                }
-                KeyCode::Backspace => {
-                    app.on_backspace();
-                }
-                KeyCode::Left => {
-                    app.on_left();
-                }
-                KeyCode::Right => {
-                    app.on_right();
-                }
+                KeyCode::Char(c) => app.on_char(c),
+                KeyCode::Tab => app.next_block(),
+                KeyCode::Backspace => app.on_backspace(),
+                KeyCode::Left => app.on_left(),
+                KeyCode::Right => app.on_right(),
+                KeyCode::Up => app.on_up(),
+                KeyCode::Down => app.on_down(),
+                KeyCode::PageUp => app.on_page_up(),
+                KeyCode::PageDown => app.on_page_down(),
                 KeyCode::Enter => match app.on_enter() {
                     CommandResult::Quit => {
                         break;
