@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::prelude::*;
+use std::io::SeekFrom;
 
 const VIEWER_X_START: u16 = 15;
 const VIEWER_Y_START: u16 = 3;
@@ -42,7 +43,7 @@ impl ViewerState {
     }
 
     pub fn open(&mut self, path: String) {
-        self.file_handle = Some(File::create(path).unwrap());
+        self.file_handle = Some(File::open(path).unwrap());
     }
 
     fn is_range_cached(&self, offset: u64, length: u64) -> isize {
@@ -66,11 +67,20 @@ impl ViewerState {
         }
 
         let mut cache = BufferCache::new(offset, 1048576);
+
         self.file_handle
             .as_ref()
             .unwrap()
-            .read(&mut cache.buffer)
+            .seek(SeekFrom::Start(offset))
             .unwrap();
+
+        cache.length = self
+            .file_handle
+            .as_ref()
+            .unwrap()
+            .read(&mut cache.buffer)
+            .unwrap() as u64;
+
         self.caches.push(cache);
 
         &self.caches[self.caches.len() - 1].buffer[0..length as usize]
