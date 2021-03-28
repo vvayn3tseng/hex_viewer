@@ -98,7 +98,10 @@ impl App {
     }
 
     pub fn open_file(&mut self, path: String) {
-        self.viewer_state.open(path);
+        match self.viewer_state.open(path) {
+            Err(e) => self.push_erro_msg(e.to_string()),
+            _ => {}
+        }
     }
 
     pub fn on_jump(&mut self, offset: u64) {

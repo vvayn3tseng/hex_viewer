@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::SeekFrom;
+use std::io::{Error, SeekFrom};
 
 const VIEWER_X_START: u16 = 15;
 const VIEWER_Y_START: u16 = 3;
@@ -42,8 +42,9 @@ impl ViewerState {
         }
     }
 
-    pub fn open(&mut self, path: String) {
-        self.file_handle = Some(File::open(path).unwrap());
+    pub fn open(&mut self, path: String) -> Result<(), Error> {
+        self.file_handle = Some(File::open(path)?);
+        Ok(())
     }
 
     fn is_range_cached(&self, offset: u64, length: u64) -> isize {
