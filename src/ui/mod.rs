@@ -41,7 +41,6 @@ fn draw_viewer<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
 where
     B: Backend,
 {
-    let rect = f.size();
     let border_style = get_border_style(app.active(), ActiveBlock::Viewer);
     let current_offset = app.viewer_state.offset;
 

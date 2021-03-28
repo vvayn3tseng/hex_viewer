@@ -21,7 +21,7 @@ impl App {
     pub fn new() -> Self {
         App {
             active_block: 0,
-            all_blocks: vec![ActiveBlock::Command, ActiveBlock::Viewer],
+            all_blocks: vec![ActiveBlock::Viewer, ActiveBlock::Command],
             command_state: CommandState::new(),
             viewer_state: ViewerState::new(),
         }

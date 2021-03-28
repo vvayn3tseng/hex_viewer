@@ -44,6 +44,10 @@ fn main() -> Result<(), io::Error> {
                     CommandResult::Open(path) => {
                         app.open_file(path);
                     }
+                    CommandResult::Error(reason, msg) => {
+                        let error_msg = format!("command error {:?}, {}", reason, msg);
+                        println!("{}", error_msg);
+                    }
                     _ => {}
                 },
                 _ => {}
