@@ -75,7 +75,7 @@ impl ViewerState {
             .seek(SeekFrom::Start(offset))
             .unwrap();
 
-        cache.length = self
+        let actual_length = self
             .file_handle
             .as_ref()
             .unwrap()
@@ -84,22 +84,34 @@ impl ViewerState {
 
         self.caches.push(cache);
 
-        &self.caches[self.caches.len() - 1].buffer[0..length as usize]
+        &self.caches[self.caches.len() - 1].buffer[0..actual_length as usize]
     }
 
     pub fn on_left(&mut self) {
+        if self.file_handle.is_none() {
+            return;
+        }
+
         if self.cursor.0 - 1 >= VIEWER_X_START {
             self.cursor.0 -= 1;
         }
     }
 
     pub fn on_right(&mut self) {
+        if self.file_handle.is_none() {
+            return;
+        }
+
         if self.cursor.0 + 1 <= LINE_COUNT {
             self.cursor.0 += 1;
         }
     }
 
     pub fn on_up(&mut self) {
+        if self.file_handle.is_none() {
+            return;
+        }
+
         if self.cursor.1 - 1 >= VIEWER_Y_START {
             self.cursor.1 -= 1;
         } else if self.offset >= BYTE_NUMBER {
@@ -108,6 +120,19 @@ impl ViewerState {
     }
 
     pub fn on_down(&mut self) {
+        if self.file_handle.is_none() {
+            return;
+        }
+
+        let meta = self.file_handle.as_ref().unwrap().metadata().unwrap();
+
+        let cursor_offset =
+            self.offset + (((self.cursor.1 as usize) - (VIEWER_Y_START as usize)) * BYTE_NUMBER);
+
+        if cursor_offset >= meta.len() as usize {
+            return;
+        }
+
         if self.cursor.1 + 1 < self.height {
             self.cursor.1 += 1;
         } else {
@@ -116,10 +141,18 @@ impl ViewerState {
     }
 
     pub fn on_page_down(&mut self) {
+        if self.file_handle.is_none() {
+            return;
+        }
+
         self.offset += ((self.height - VIEWER_Y_START) * BYTE_NUMBER as u16) as usize;
     }
 
     pub fn on_page_up(&mut self) {
+        if self.file_handle.is_none() {
+            return;
+        }
+
         let offset = ((self.height - 3) * BYTE_NUMBER as u16) as usize;
 
         if self.offset < offset {
@@ -127,5 +160,10 @@ impl ViewerState {
         } else {
             self.offset -= offset;
         }
+    }
+
+    pub fn on_jump(&mut self, offset: u64) {
+        let floor = offset - (offset % 16);
+        self.offset = floor as usize;
     }
 }

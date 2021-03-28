@@ -3,7 +3,7 @@ mod event;
 mod ui;
 
 use app::command::CommandResult;
-use crossterm::event::KeyCode;
+use crossterm::{event::KeyCode, terminal::enable_raw_mode};
 use std::time::Duration;
 use std::{io, sync::mpsc};
 use tui::backend::CrosstermBackend;
@@ -11,6 +11,9 @@ use tui::Terminal;
 
 fn main() -> Result<(), io::Error> {
     let stdout = io::stdout();
+
+    enable_raw_mode().unwrap();
+
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 

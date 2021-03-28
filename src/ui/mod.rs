@@ -46,53 +46,56 @@ where
     let current_offset = app.viewer_state.offset;
 
     app.viewer_state.height = area.height;
-
     let mut text = vec![];
-    let mut data: &[u8] = &[];
 
     if app.viewer_state.file_handle.is_some() {
-        data = app
+        let data = app
             .viewer_state
             .read(current_offset as u64, (area.height * 16) as u64);
-    }
 
-    // byte offset header
-    let offset_display = format!("{:011X}", current_offset);
-    let mut line = vec![];
-    line.push(Span::raw(
-        (0..offset_display.len() + 2)
-            .map(|_| " ")
-            .collect::<String>(),
-    ));
-    for offset in HEADER {
-        line.push(Span::raw(offset.clone()));
-        line.push(Span::raw(" "));
-    }
-    text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
+        // byte offset header
+        let offset_display = format!("{:011X}", current_offset);
+        let mut line = vec![];
+        line.push(Span::raw(
+            (0..offset_display.len() + 2)
+                .map(|_| " ")
+                .collect::<String>(),
+        ));
+        for offset in HEADER {
+            line.push(Span::raw(offset.clone()));
+            line.push(Span::raw(" "));
+        }
+        text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
 
-    // data part
-    let mut offset = 0;
-    for i in 0..area.height {
-        let display = format!("{:011X}  ", current_offset + 16 * i as usize);
-        line.push(Span::raw(display));
+        // data part
+        let mut offset = 0;
+        for i in 0..area.height {
+            let display = format!("{:011X}  ", current_offset + 16 * i as usize);
+            line.push(Span::raw(display));
 
-        if data.len() != 0 {
-            let size = if offset + 16 >= data.len() {
-                data.len() - offset
-            } else {
-                16
-            };
+            if data.len() != 0 {
+                let size = if offset + 16 >= data.len() {
+                    data.len() - offset
+                } else {
+                    16
+                };
 
-            for i in 0..size {
-                let hex = format!("{:02X}", data[offset + i]);
-                line.push(Span::raw(hex));
-                line.push(Span::raw(" "));
+                for i in 0..size {
+                    let hex = format!("{:02X}", data[offset + i]);
+                    line.push(Span::raw(hex));
+                    line.push(Span::raw(" "));
+                }
+
+                if size != 16 {
+                    text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
+                    break;
+                }
+
+                offset += size;
             }
 
-            offset += size;
+            text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
         }
-
-        text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
     }
 
     let para = Paragraph::new(text).block(
@@ -102,7 +105,7 @@ where
             .border_style(border_style),
     );
 
-    if app.active() == ActiveBlock::Viewer {
+    if app.active() == ActiveBlock::Viewer && app.viewer_state.file_handle.is_some() {
         f.set_cursor(app.viewer_state.cursor.0, app.viewer_state.cursor.1);
     }
 
