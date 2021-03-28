@@ -28,6 +28,7 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     draw_viewer(f, app, chunks[0]);
     draw_command(f, app, chunks[1]);
+    draw_error(f, app, chunks[2]);
 }
 
 fn get_border_style(current: ActiveBlock, target: ActiveBlock) -> Style {
@@ -45,32 +46,6 @@ where
     let current_offset = app.viewer_state.offset;
 
     app.viewer_state.height = area.height;
-    // let data: Vec<u8> = vec![
-    //     0x15, 0xfd, 0xa0, 0x00, 0x12, 0x10, 0x80, 0x95, 0xfe, 0x15, 0xfd, 0xa0, 0x00, 0x12, 0x10,
-    //     0x80, 0x95, 0xfe,
-    // ];
-    // let mut text = vec![];
-    // let mut line = vec![];
-
-    // let mut count = 0;
-    // for byte in data {
-    //     let display = format!("{:X}", byte);
-
-    //     line.push(Span::raw(display));
-
-    //     count += 1;
-
-    //     if count == 16 {
-    //         count = 0;
-    //         text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
-    //     } else {
-    //         line.push(Span::raw(" "));
-    //     }
-    // }
-
-    // if count != 16 {
-    //     text.push(Spans::from(line.drain(..).collect::<Vec<Span>>()));
-    // }
 
     let mut text = vec![];
     let mut data: &[u8] = &[];
@@ -154,4 +129,14 @@ where
         );
     }
     f.render_widget(command, area);
+}
+
+fn draw_error<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
+where
+    B: Backend,
+{
+    let error =
+        Paragraph::new(app.last_error.as_ref()).block(Block::default().borders(Borders::NONE));
+
+    f.render_widget(error, area);
 }

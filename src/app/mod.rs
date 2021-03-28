@@ -15,6 +15,7 @@ pub struct App {
     pub all_blocks: Vec<ActiveBlock>,
     pub command_state: CommandState,
     pub viewer_state: ViewerState,
+    pub last_error: String,
 }
 
 impl App {
@@ -24,6 +25,7 @@ impl App {
             all_blocks: vec![ActiveBlock::Viewer, ActiveBlock::Command],
             command_state: CommandState::new(),
             viewer_state: ViewerState::new(),
+            last_error: String::from(""),
         }
     }
 
@@ -97,5 +99,9 @@ impl App {
 
     pub fn open_file(&mut self, path: String) {
         self.viewer_state.open(path);
+    }
+
+    pub fn push_erro_msg(&mut self, msg: String) {
+        self.last_error = msg;
     }
 }
