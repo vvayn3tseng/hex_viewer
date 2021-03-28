@@ -84,8 +84,8 @@ where
             };
 
             for i in 0..size {
-                let binary = format!("{:02X}", data[offset + i]);
-                line.push(Span::raw(binary));
+                let hex = format!("{:02X}", data[offset + i]);
+                line.push(Span::raw(hex));
                 line.push(Span::raw(" "));
             }
 

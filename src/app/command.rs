@@ -12,6 +12,7 @@ pub enum CommandResult {
     None,
     Quit,
     Open(String),
+    Jump(u64),
 }
 
 struct CommandParser {
@@ -64,12 +65,33 @@ fn open_handler(param: Vec<&str>) -> CommandResult {
     CommandResult::Open(String::from(param[0]))
 }
 
+fn jump_handler(param: Vec<&str>) -> CommandResult {
+    if param.len() != 1 {
+        return CommandResult::Error(
+            CommandErrorReason::InvalidArgument,
+            String::from("missing jump offset"),
+        );
+    }
+
+    let offset = param[0].parse::<i64>().unwrap_or(-1);
+
+    if offset < 0 {
+        return CommandResult::Error(
+            CommandErrorReason::InvalidArgument,
+            format!("invalid jump offset {}", param[0]),
+        );
+    }
+
+    CommandResult::Jump(offset as u64)
+}
+
 impl CommandState {
     pub fn new() -> Self {
         let mut parser = CommandParser::new();
 
         parser.add_handler(String::from("quit"), |_| return CommandResult::Quit);
         parser.add_handler(String::from("open"), open_handler);
+        parser.add_handler(String::from("jump"), jump_handler);
 
         CommandState {
             input: String::new(),

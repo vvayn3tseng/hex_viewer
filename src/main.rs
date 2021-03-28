@@ -40,12 +40,9 @@ fn main() -> Result<(), io::Error> {
                 KeyCode::Enter => {
                     app.push_erro_msg(String::from(""));
                     match app.on_enter() {
-                        CommandResult::Quit => {
-                            break;
-                        }
-                        CommandResult::Open(path) => {
-                            app.open_file(path);
-                        }
+                        CommandResult::Quit => break,
+                        CommandResult::Open(path) => app.open_file(path),
+                        CommandResult::Jump(offset) => app.on_jump(offset),
                         CommandResult::Error(reason, msg) => {
                             let error_msg = format!("command error {:?}, {}", reason, msg);
                             app.push_erro_msg(error_msg);

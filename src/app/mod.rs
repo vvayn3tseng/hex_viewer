@@ -101,6 +101,11 @@ impl App {
         self.viewer_state.open(path);
     }
 
+    pub fn on_jump(&mut self, offset: u64) {
+        let floor = offset - (offset % 16);
+        self.viewer_state.offset = floor as usize;
+    }
+
     pub fn push_erro_msg(&mut self, msg: String) {
         self.last_error = msg;
     }
