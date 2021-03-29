@@ -145,7 +145,16 @@ impl ViewerState {
             return;
         }
 
-        self.offset += ((self.height - VIEWER_Y_START) * BYTE_NUMBER as u16) as usize;
+        let offset = ((self.height - VIEWER_Y_START) * BYTE_NUMBER as u16) as usize;
+        let meta = self.file_handle.as_ref().unwrap().metadata().unwrap();
+
+        if self.offset + offset >= meta.len() as usize {
+            self.offset = (meta.len() - meta.len() % 16) as usize;
+            self.cursor.0 = VIEWER_X_START;
+            self.cursor.1 = VIEWER_Y_START;
+        } else {
+            self.offset += offset;
+        }
     }
 
     pub fn on_page_up(&mut self) {
@@ -164,6 +173,14 @@ impl ViewerState {
 
     pub fn on_jump(&mut self, offset: u64) {
         let floor = offset - (offset % 16);
-        self.offset = floor as usize;
+        let meta = self.file_handle.as_ref().unwrap().metadata().unwrap();
+
+        if floor >= meta.len() {
+            self.offset = (meta.len() - meta.len() % 16) as usize;
+            self.cursor.0 = VIEWER_X_START;
+            self.cursor.1 = VIEWER_Y_START;
+        } else {
+            self.offset = floor as usize;
+        }
     }
 }
